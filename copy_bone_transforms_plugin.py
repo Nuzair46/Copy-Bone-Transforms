@@ -50,14 +50,16 @@ class ArmatureSelectorPanel(bpy.types.Panel):
         row.label(text="Base Armature:")
         row = layout.row()
         row.prop(context.scene, "base_armature", text="")
+        row.operator("scene.select_base_armature")
 
         row = layout.row()
         row.label(text="Target Armature:")
         row = layout.row()
         row.prop(context.scene, "target_armature", text="")
+        row.operator("scene.select_target_armature")
 
         row = layout.row()
-        row.operator("armature.apply_transforms", text="Apply Transforms")
+        row.operator("armature.apply_transforms", text="Copy Transforms")
 
 class ApplyTransformsOperator(bpy.types.Operator):
     bl_idname = "armature.apply_transforms"
@@ -73,57 +75,63 @@ class ApplyTransformsOperator(bpy.types.Operator):
             return {'CANCELLED'}
 
         base_bones = bpy.data.armatures[base_armature].bones
-
         target_armature_obj = bpy.data.objects[target_armature]
-        bpy.context.view_layer.objects.active = target_armature_obj
-        bpy.ops.object.mode_set(mode='EDIT')
 
-        for base_bone in base_bones:
-            try:
-                bone_pose = target_armature_obj.pose.bones[base_bone.name]
-                if bone_pose:
-                    bone_pose.matrix = base_bone.matrix_local
+        with bpy.context.temp_override(
+            active_object=target_armature_obj
+        ):
+            bpy.ops.object.mode_set(mode='EDIT')
+            for base_bone in base_bones:
+                try:
+                    bone_pose = target_armature_obj.pose.bones[base_bone.name]
+                    if bone_pose:
+                        bone_pose.matrix = base_bone.matrix_local
 
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
+        
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         self.report({'INFO'}, "Transforms applied successfully.")
         return {'FINISHED'}
-
-armatures = [obj for obj in bpy.context.scene.objects if obj.type == 'ARMATURE']
  
-class InitSceneProperties(bpy.types.Operator):
-    bl_idname = "scene.init_scene_properties"
-    bl_label = "Init Scene Properties"
+class SelectBaseArmature(bpy.types.Operator):
+    bl_idname = "scene.select_base_armature"
+    bl_label = "Select Base Armature"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
+        armatures = [obj for obj in bpy.context.scene.objects if obj.type == 'ARMATURE']
         bpy.types.Scene.base_armature = bpy.props.EnumProperty(
             name="Base Armature",
             items=[(arm.name, arm.name, "") for arm in armatures],
         )
+        
+        return {'FINISHED'}
+    
+class SelectTargetArmature(bpy.types.Operator):
+    bl_idname = "scene.select_target_armature"
+    bl_label = "Select Target Armature"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        armatures = [obj for obj in bpy.context.scene.objects if obj.type == 'ARMATURE']
         bpy.types.Scene.target_armature = bpy.props.EnumProperty(
             name="Target Armature",
             items=[(arm.name, arm.name, "") for arm in armatures],
         )
+        
         return {'FINISHED'}
 
 def register():
-    bpy.utils.register_class(InitSceneProperties)
+    bpy.utils.register_class(SelectBaseArmature)
+    bpy.utils.register_class(SelectTargetArmature)
     bpy.utils.register_class(ArmatureSelectorPanel)
     bpy.utils.register_class(ApplyTransformsOperator)
-    bpy.types.Scene.base_armature = bpy.props.EnumProperty(
-        name="Base Armature",
-        items=[(arm.name, arm.name, "") for arm in armatures],
-    )
-    bpy.types.Scene.target_armature = bpy.props.EnumProperty(
-        name="Target Armature",
-        items=[(arm.name, arm.name, "") for arm in armatures],
-    )
-    
 
 def unregister():
-    bpy.utils.unregister_class(InitSceneProperties)
+    bpy.utils.unregister_class(SelectBaseArmature)
+    bpy.utils.unregister_class(SelectTargetArmature)
     bpy.utils.unregister_class(ArmatureSelectorPanel)
     bpy.utils.unregister_class(ApplyTransformsOperator)
     del bpy.types.Scene.base_armature
