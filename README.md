@@ -21,5 +21,6 @@ Designed to simplify the process of aligning bones of armatures before merging t
 - Click on "Apply Transforms" to copy the bone transforms from the base armature to the target armature.
 - The copied transforms will now be applied to the target armature bones with matching names.
 
-Note: If you encounter any issues, ensure that both armatures have the same bone names and that the plugin is correctly installed and enabled in Blender.
-This addon is not failproof and may not work as it should at this moment. For all its worth, take it as a poc.
+#### Note: 
+- If you encounter any issues, ensure that both armatures have the same bone names and that the plugin is correctly installed and enabled in Blender.
+- This addon is not failproof and may not work as it should at this moment. For all its worth, take it as a poc.
