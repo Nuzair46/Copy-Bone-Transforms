@@ -4,7 +4,7 @@ Designed to simplify the process of aligning bones of armatures before merging t
 
 
 ### Installation
-- Download the latest plugin from the [released](https://github.com/Nuzair46/Copy-Bone-Transforms/releases/latest).
+- Download the latest plugin from the [releases](https://github.com/Nuzair46/Copy-Bone-Transforms/releases/latest).
 - In Blender, go to `Edit > Preferences > Add-ons`.
 - Click `Install` and select the downloaded zip file.
 - Check the box next to "Copy Bone Transforms Plugin" to enable the plugin.
