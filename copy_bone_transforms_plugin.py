@@ -1,7 +1,7 @@
 '''
 MIT License
 
-Copyright (c) 2023 Nuzair
+Copyright (c) 2024 Nuzair
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ bl_info = {
     'category': '3D View',
     'author': 'Nuzair46',
     'description': 'A tool designed to shorten steps needed to import and optimize models into VRChat',
-    'version': (0, 1, 0),
+    'version': (0, 1, 2),
     'blender': (2, 80, 0),
     'wiki_url': 'https://github.com/Nuzair46/Copy-Bone-Transforms',
     'tracker_url': 'https://github.com/Nuzair46/Copy-Bone-Transforms',
@@ -74,8 +74,18 @@ class ApplyTransformsOperator(bpy.types.Operator):
             self.report({'ERROR'}, "Both base and target armatures must be selected.")
             return {'CANCELLED'}
 
-        base_bones = bpy.data.armatures[base_armature].bones
+        base_armature_obj = bpy.data.objects[base_armature]
         target_armature_obj = bpy.data.objects[target_armature]
+
+        # Apply the location, rotation, and scale of the base armature to its data
+        bpy.context.view_layer.objects.active = base_armature_obj
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        # Scale the entire target armature to match the base armature
+        target_armature_obj.scale = base_armature_obj.scale
+
+        base_bones = base_armature_obj.data.bones
 
         with bpy.context.temp_override(
             active_object=target_armature_obj
@@ -83,16 +93,16 @@ class ApplyTransformsOperator(bpy.types.Operator):
             bpy.ops.object.mode_set(mode='EDIT')
             for base_bone in base_bones:
                 try:
-                    bone_pose = target_armature_obj.pose.bones[base_bone.name]
-                    if bone_pose:
-                        bone_pose.matrix = base_bone.matrix_local
+                    bone_edit = target_armature_obj.data.edit_bones[base_bone.name]
+                    if bone_edit:
+                        bone_edit.matrix = base_bone.matrix_local  # Copy the transformation matrix
 
                 except KeyError:
                     pass
         
             bpy.ops.object.mode_set(mode='OBJECT')
 
-        self.report({'INFO'}, "Transforms applied successfully.")
+        self.report({'INFO'}, "Transforms and scales applied successfully.")
         return {'FINISHED'}
  
 class SelectBaseArmature(bpy.types.Operator):
