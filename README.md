@@ -12,7 +12,7 @@ Designed to simplify the process of aligning bones of armatures before merging t
 
 ### Video Example:
 
-https://github.com/Nuzair46/Copy-Bone-Transforms/blob/main/videos/final.mp4
+https://github.com/Nuzair46/Copy-Bone-Transforms/blob/main/videos/final.gif
 
 ### Usage:
 
